@@ -16,9 +16,10 @@ var App = React.createClass({
     return {       
       breakCount: 5,
       key: 'Start',
-      minutes: 0,
-      seconds: 0,
+      minutes: '25',
+      seconds: '00',
       secondsElapsed: 0,
+      workStatus: true,
       timeElapsed: 1500,
       timerStart: false,
       workCount: 25      
@@ -29,14 +30,26 @@ var App = React.createClass({
     var timeElapsed = this.state.timeElapsed - 1,
         minutes = Math.floor(timeElapsed / 60),
         seconds = minutes ? timeElapsed - (minutes * 60) : timeElapsed;
-         
-    if (this.state.timerStart) {
+        
+    if (!timeElapsed) {
       this.setState({
-        minutes: minutes,
-        seconds: seconds,
-        secondsElapsed: this.state.secondsElapsed + 1,
-        timeElapsed: timeElapsed
+        workStatus : !this.state.workStatus
       });
+    } else {
+      seconds = seconds.toString();
+      if (seconds.length === 1) seconds = '0' + seconds;
+      
+      minutes = minutes.toString();
+      if (minutes.length === 1) minutes = '0' + minutes;
+  
+      if (this.state.timerStart) {
+        this.setState({
+          minutes: minutes,
+          seconds: seconds,
+          secondsElapsed: this.state.secondsElapsed + 1,
+          timeElapsed: timeElapsed
+        });
+      }
     }
   },
   componentDidMount: function() {
@@ -51,23 +64,56 @@ var App = React.createClass({
     var text = e.target.text,
         count = this.state.breakCount;
     console.log(e.target.text);
-    var newCount = text === '+' ? count + 1 : count - 1;
+    
+    var newCount = text === '+' ? 
+                    count + 1 : 
+                    count < 2 ? 
+                      count : 
+                      count - 1;
+                      
     this.setState({
-      breakCount: newCount,
-      timeElapsed: newCount * 60,
-      timerStart: false
+      breakCount: newCount
     });
+    
+    var minutes = newCount.toString();
+    if (minutes.length === 1) minutes = '0' + minutes;
+    
+    if (!this.state.workStatus) {
+      this.setState({
+        minutes: newCount,
+        seconds: '00',
+        timerStart: false,
+        key: 'Start',
+        timeElapsed: Number(minutes) * 60
+      });
+    }
   },
   workChange: function (e) {  
     var text = e.target.text,
         count = this.state.workCount;
     console.log(e.target.text);
-    var newCount = text === '+' ? count + 1 : count - 1;
+    var newCount = text === '+' ? 
+                    count + 1 : 
+                    count < 2 ? 
+                      count : 
+                      count - 1;
+    
     this.setState({
-      workCount: newCount,
-      timeElapsed: newCount * 60,
-      timerStart: false
-    });
+      workCount: newCount
+    });    
+        
+    var minutes = newCount.toString();
+    if (minutes.length === 1) minutes = '0' + minutes;
+    
+    if (this.state.workStatus) {
+      this.setState({
+        minutes: minutes,
+        seconds: '00',
+        key: 'Start',
+        timerStart: false,
+        timeElapsed: Number(minutes) * 60
+      });
+    }
   },
   onStart: function () {  
     if (this.state.timerStart) {
